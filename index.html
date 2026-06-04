@@ -1,0 +1,614 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Icon hoa đào tạm thời lấy link trực tuyến tránh bị chặn -->
+    <link rel="icon" type="image/png" href="https://api.iconify.design/twemoji:cherry-blossom.svg">
+    <title>Takane no Nadeshiko - Trò chuyện với Thần tượng 🌸</title>
+    <style>
+        :root {
+            --color-bg-main: #FFFFFF;
+            --color-sidebar: #F8F9FA;
+            --color-border: #E9ECEF;
+            --color-text-main: #212529;
+            --color-text-muted: #6C757D;
+            --color-bubble-user: #E8F0FE;
+            --color-idol-theme: #FF5A96;
+            --color-idol-light: #FFF0F5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--color-bg-main);
+            color: var(--color-text-main);
+            overflow: hidden;
+        }
+
+        /* SIDEBAR DANH SÁCH THÀNH VIÊN */
+        .sidebar {
+            width: 290px;
+            background-color: var(--color-sidebar);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 16px;
+            color: #495057;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .member-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+        }
+
+        .member-item:hover {
+            background-color: #E9ECEF;
+        }
+
+        .member-item.active {
+            background-color: var(--color-idol-light);
+            border-color: var(--color-idol-theme);
+        }
+
+        .member-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid transparent;
+            background-color: #EEE;
+        }
+
+        .member-item.active .member-avatar {
+            border-color: var(--color-idol-theme);
+        }
+
+        .member-info-mini h4 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .member-info-mini p {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-top: 2px;
+        }
+
+        /* KHUNG CHAT CHÍNH */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--color-bg-main);
+        }
+
+        .top-bar {
+            height: 70px;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .top-bar .current-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            background-color: #EEE;
+        }
+
+        .top-bar h2 {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .top-bar p {
+            font-size: 12px;
+            color: var(--color-idol-theme);
+            font-weight: 500;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
+        }
+
+        .message-row.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message-row.bot {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14.5px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .user .bubble {
+            background-color: var(--color-bubble-user);
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot .bubble {
+            background-color: var(--color-idol-light);
+            border-bottom-left-radius: 4px;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .input-area {
+            padding: 20px 25px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            background-color: #F1F3F4;
+            border-radius: 24px;
+            padding: 4px 6px 4px 16px;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: border 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--color-idol-theme);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 3px var(--color-idol-light);
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 0;
+            font-size: 14.5px;
+            outline: none;
+        }
+
+        .input-wrapper button {
+            background-color: var(--color-idol-theme);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        /* PANEL THẺ CÁ NHÂN */
+        .profile-panel {
+            width: 330px;
+            background-color: var(--color-sidebar);
+            border-left: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 20px;
+            overflow-y: auto;
+        }
+
+        .photocard-container {
+            width: 250px;
+            height: 355px;
+            background-color: #E9ECEF;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        .photocard-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: #EEE;
+        }
+
+        .info-box {
+            width: 250px;
+            background-color: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .info-box h3 {
+            font-size: 15px;
+            color: var(--color-idol-theme);
+            margin-bottom: 12px;
+            border-bottom: 1px dashed var(--color-border);
+            padding-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .info-box p {
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box b {
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. SIDEBAR THÀNH VIÊN -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>Takane no nadeshiko 🌸</h1>
+        </div>
+        <div class="member-list" id="memberList"></div>
+    </div>
+
+    <!-- 2. KHUNG CHAT -->
+    <div class="chat-container">
+        <div class="top-bar">
+            <img src="" id="topAvatar" class="current-avatar" alt="Avatar">
+            <div>
+                <h2 id="topName">Tên Thần Tượng</h2>
+                <p id="topStatus">Đang hoạt động cục bộ • Llama 3.2</p>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Nhập lời muốn nói gửi thần tượng..." autocomplete="off">
+                <button onclick="sendMessage()">Gửi tin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. PANEL THẺ CÁ NHÂN -->
+    <div class="profile-panel">
+        <div class="photocard-container">
+            <img src="" id="profileCard" class="photocard-img" alt="Photocard">
+        </div>
+
+        <div class="info-box">
+            <h3>Thông tin cá nhân</h3>
+            <div id="profileDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        // Hệ thống dữ liệu đã chuyển sang sử dụng URL trực tuyến để hiển thị tức thì trên Localhost
+        const TAKANEKO_DATA = [
+            {
+                id: "Haruno_Riri",
+                name: "Haruno Riri",
+                jpName: "春野 莉々",
+                birthday: "16/01/2004",
+                hometown: "Nagaoto",
+                colorName: "Xanh lá",
+                colorHex: "#2ECC71",
+                colorLight: "#EAFAF1",
+                traits: "Thành viên có nụ cười tỏa nắng và nét duyên dáng thanh lịch đặc trưng.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/riri-haruno.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/riri-haruno.webp"
+            },
+            {
+                id: "Hashimoto_Momoko",
+                name: "Hashimoto Momoko",
+                jpName: "橋本 桃呼",
+                birthday: "28/06/2003",
+                hometown: "Yamaguchi",
+                colorName: "Hồng nhạt",
+                colorHex: "#FFA6C9",
+                colorLight: "#FFF5F8",
+                traits: "Cực kỳ sôi nổi, hoạt bát, là người làm bừng sáng không khí của cả nhóm.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/momoko-hashimoto.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/momoko-hashimoto.webp"
+            },
+            {
+                id: "Higashiyama_Erisa",
+                name: "Higashiyama Erisa",
+                jpName: "東山 恵里沙",
+                birthday: "28/05/2006",
+                hometown: "Gifu",
+                colorName: "Cam",
+                colorHex: "#E67E22",
+                colorLight: "#FDF2E9",
+                traits: "Thành viên tài năng với khả năng vũ đạo và biểu cảm sân khấu đầy lôi cuốn.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/erisa-higashiyama.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/erisa-higashiyama.webp"
+            },
+            {
+                id: "Hinamata_Hina",
+                name: "Hinamata Hina",
+                jpName: "日向 端ひな",
+                birthday: "02/02/2002",
+                hometown: "Kanagawa",
+                colorName: "Tím",
+                colorHex: "#9B59B6",
+                colorLight: "#F5EEF8",
+                traits: "Mang vẻ sang trọng, dịu dàng, sở hữu giọng hát trong trẻo ngọt ngào.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/hina-hinahata.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/hina-hinahata.webp"
+            },
+            {
+                id: "Hoshitani_Miruku",
+                name: "Hoshitani Miruku",
+                jpName: "星谷 美来",
+                birthday: "06/11/2003",
+                hometown: "Tokyo",
+                colorName: "Đỏ",
+                colorHex: "#E74C3C",
+                colorLight: "#FDEDEC",
+                traits: "Tính cách dễ thương, ngọt ngào, được rất nhiều người hâm mộ yêu mến.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/mikuru-hoshitani.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/mikuru-hoshitani.webp"
+            },
+            {
+                id: "Kizuki_Nao",
+                name: "Kizuki Nao",
+                jpName: "城月 菜央",
+                birthday: "25/12/2003",
+                hometown: "Aichi",
+                colorName: "Vàng",
+                colorHex: "#F1C40F",
+                colorLight: "#FEF9E7",
+                traits: "Luôn mang năng lượng tích cực, hài hước và rất chu đáo với mọi người.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/nao-kizuki.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/nao-kizuki.webp"
+            },
+            {
+                id: "Momiyama_Himeri",
+                name: "Momiyama Himeri",
+                jpName: "籾山 ひめり",
+                birthday: "22/03/2004",
+                hometown: "Tochigi",
+                colorName: "Xanh dương",
+                colorHex: "#007FFF",
+                colorLight: "#E6F2FF",
+                traits: "Người trưởng nhóm đáng tin cậy, chỗ dựa tinh thần lớn cho toàn đội.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/himeri-momiyama.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/himeri-momiyama.webp"
+            },
+            {
+                id: "Matsumoto_Momona",
+                name: "Matsumoto Momona",
+                jpName: "松本 ももな",
+                birthday: "12/10/2002",
+                hometown: "Kanagawa",
+                colorName: "Hồng đậm",
+                colorHex: "#FF5A96",
+                colorLight: "#FFF0F5",
+                traits: "Vẻ đẹp tiểu thư chuẩn mực, phong thái ngọt ngào đốn tim fan hâm mộ.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/momona-matsumoto.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/momona-matsumoto.webp"
+            },
+            {
+                id: "Hazuki_Saara",
+                name: "Hazuki Saara",
+                jpName: "葉月 紗蘭",
+                birthday: "03/03/2005",
+                hometown: "Mie",
+                colorName: "Xám bạc",
+                colorHex: "#7F8C8D",
+                colorLight: "#F2F4F4",
+                traits: "Nét cá tính độc đáo pha lẫn chút tinh nghịch đáng yêu vô cùng hút mắt.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/saara-hazuki.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/saara-hazuki.webp"
+            },
+            {
+                id: "Suzumi_Su",
+                name: "Suzumi Su",
+                jpName: "涼海 すう",
+                birthday: "22/08/2007",
+                hometown: "Osaka",
+                colorName: "Xanh dương nhạt",
+                colorHex: "#1ABC9C",
+                colorLight: "#E8F8F5",
+                traits: "Thành viên nhỏ tuổi với sự hồn nhiên, đáng yêu và tiềm năng phát triển lớn.",
+                avatarUrl: "https://takanekofan.app/takaneko/members/su-suzumi.webp",
+                cardUrl: "https://takanekofan.app/takaneko/members/su-suzumi.webp"
+            }
+        ];
+
+        const memoryHistories = {};
+        let currentIdolIndex = 0;
+
+        const memberListContainer = document.getElementById('memberList');
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+
+        function initSidebar() {
+            memberListContainer.innerHTML = '';
+            TAKANEKO_DATA.forEach((idol, index) => {
+                const item = document.createElement('div');
+                item.className = `member-item ${index === currentIdolIndex ? 'active' : ''}`;
+                item.onclick = () => selectIdol(index);
+
+                item.innerHTML = `
+                    <img src="${idol.avatarUrl}" class="member-avatar" alt="${idol.name}">
+                    <div class="member-info-mini">
+                        <h4>${idol.name}</h4>
+                        <p>Màu: ${idol.colorName}</p>
+                    </div>
+                `;
+                memberListContainer.appendChild(item);
+            });
+        }
+
+        function selectIdol(index) {
+            currentIdolIndex = index;
+            const idol = TAKANEKO_DATA[index];
+
+            document.documentElement.style.setProperty('--color-idol-theme', idol.colorHex);
+            document.documentElement.style.setProperty('--color-idol-light', idol.colorLight);
+
+            const items = document.querySelectorAll('.member-item');
+            items.forEach((item, idx) => {
+                if(idx === index) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            document.getElementById('topAvatar').src = idol.avatarUrl;
+            document.getElementById('topName').innerText = `${idol.name} (${idol.jpName}) 🌸`;
+            document.getElementById('profileCard').src = idol.cardUrl;
+
+            document.getElementById('profileDetails').innerHTML = `
+                <p><b>Ngày sinh:</b> ${idol.birthday}</p>
+                <p><b>Quê quán:</b> ${idol.hometown}</p>
+                <p><b>Màu sắc:</b> ${idol.colorName}</p>
+                <p><b>Đặc điểm:</b> ${idol.traits}</p>
+            `;
+
+            renderChatHistory();
+        }
+
+        function renderChatHistory() {
+            const idol = TAKANEKO_DATA[currentIdolIndex];
+            if (!memoryHistories[idol.id]) {
+                const timeStr = new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0');
+                memoryHistories[idol.id] = [{
+                    sender: 'bot',
+                    text: `Chào Khánh! Mình là ${idol.name} đây~ ♥ Thật vui vì được gặp bạn trên ứng dụng đồ án này. Hãy nhắn gì đó với mình nha! ✨`,
+                    time: timeStr
+                }];
+            }
+
+            chatMessages.innerHTML = '';
+            memoryHistories[idol.id].forEach(msg => {
+                const msgRow = document.createElement('div');
+                msgRow.className = `message-row ${msg.sender}`;
+                msgRow.innerHTML = `
+                    <div class="bubble">${msg.text}</div>
+                    <div class="timestamp">${msg.time}</div>
+                `;
+                chatMessages.appendChild(msgRow);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            const idol = TAKANEKO_DATA[currentIdolIndex];
+            const timeStr = new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0');
+
+            memoryHistories[idol.id].push({ sender: 'user', text: text, time: timeStr });
+            renderChatHistory();
+            userInput.value = '';
+
+            const typingId = 'typing-' + Date.now();
+            const typingRow = document.createElement('div');
+            typingRow.className = 'message-row bot';
+            typingRow.id = typingId;
+            typingRow.innerHTML = `
+                <div class="bubble" style="font-style: italic; color: var(--color-text-muted);">
+                    ${idol.name} đang suy nghĩ câu trả lời... ✨
+                </div>
+                <div class="timestamp">...</div>
+            `;
+            chatMessages.appendChild(typingRow);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, idol_id: idol.id, idol_name: idol.name })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const typingEl = document.getElementById(typingId);
+                if(typingEl) typingEl.remove();
+
+                if (data.status === 'success') {
+                    memoryHistories[idol.id].push({ sender: 'bot', text: data.reply, time: data.time });
+                } else {
+                    memoryHistories[idol.id].push({ sender: 'bot', text: 'Mạng chỗ tớ hơi chập chờn một chút, Khánh gửi lại nha~ ♡', time: timeStr });
+                }
+                renderChatHistory();
+            })
+            .catch(err => {
+                const typingEl = document.getElementById(typingId);
+                if(typingEl) typingEl.remove();
+                memoryHistories[idol.id].push({ sender: 'bot', text: 'Tớ chuẩn bị ra sân khấu biểu diễn rồi, lát nữa trò chuyện tiếp với Khánh nha~ ♥', time: timeStr });
+                renderChatHistory();
+            });
+        }
+
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        window.onload = function() {
+            initSidebar();
+            selectIdol(0); // Chọn mặc định thành viên đầu tiên (Haruno Riri) để mở màn
+        };
+    </script>
+</body>
+</html>
